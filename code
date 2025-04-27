@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Career Streams - Permanent Form</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: #0077cc;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .stream-container, .form-container, .details {
+      margin: 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .stream-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .stream-card {
+      background: white;
+      border: 2px solid #0077cc;
+      border-radius: 8px;
+      padding: 20px;
+      width: 200px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .stream-card:hover {
+      background: #0077cc;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .form-container input, .form-container textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .form-container button {
+      background: #0077cc;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .form-container button:hover {
+      background: #005fa3;
+    }
+
+    .projects {
+      list-style: none;
+      padding: 0;
+    }
+
+    .projects li {
+      background: #f0f0f0;
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    @media (max-width: 600px) {
+      .stream-list {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+
+    .delete-btn {
+      background: #ff4d4d;
+      color: white;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .delete-btn:hover {
+      background: #e60000;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>Select a Career Stream</header>
+
+<div class="stream-container">
+  <div class="stream-list" id="streamList"></div>
+</div>
+
+<div class="form-container">
+  <h2 id="formTitle">Fill Details for Stream</h2>
+  <input type="text" id="personInput" placeholder="Person Name" required />
+  <input type="text" id="phoneInput" placeholder="Phone Number" required />
+  <input type="email" id="emailInput" placeholder="Email Address" required />
+  <textarea id="achievementsInput" placeholder="Achievements" required></textarea>
+  <input type="text" id="leetcodeInput" placeholder="LeetCode Rank" required />
+  <input type="text" id="gfgInput" placeholder="GeeksforGeeks Rank" required />
+  <input type="text" id="hackerRankInput" placeholder="HackerRank Rank" required />
+  <input type="text" id="codechefInput" placeholder="CodeChef Rank" required />
+  <textarea id="projectsInput" placeholder="Projects (comma separated)" required></textarea>
+  <button onclick="saveDetails()">Save Details</button>
+</div>
+
+<div class="details" id="detailsSection" style="display: none;">
+  <h2 id="streamName"></h2>
+  <div id="allDetails"></div>
+</div>
+
+<script>
+  const streams = [
+    "Python Development",
+    "Java Development",
+    "SDE (Software Development Engineer)",
+    "AI/ML (Artificial Intelligence / Machine Learning)",
+    "DevOps",
+    "Full Stack Development",
+    "Frontend Development",
+    "Backend Development"
+  ];
+
+  const streamData = {};
+  let selectedStream = '';
+
+  function displayStreams() {
+    const streamList = document.getElementById('streamList');
+    streams.forEach(stream => {
+      const card = document.createElement('div');
+      card.className = 'stream-card';
+      card.innerText = stream;
+      card.onclick = () => handleStreamClick(stream);
+      streamList.appendChild(card);
+    });
+  }
+
+  function handleStreamClick(stream) {
+    selectedStream = stream;
+    document.getElementById('formTitle').innerText = `Fill Details for ${stream}`;
+    document.getElementById('detailsSection').style.display = 'block';
+    document.getElementById('streamName').innerText = `${stream} - Details`;
+    showAllDetails();
+  }
+
+  function saveDetails() {
+    if (!selectedStream) {
+      alert('Please select a stream first!');
+      return;
+    }
+
+    const person = document.getElementById('personInput').value;
+    const phone = document.getElementById('phoneInput').value;
+    const email = document.getElementById('emailInput').value;
+    const achievements = document.getElementById('achievementsInput').value;
+    const leetcode = document.getElementById('leetcodeInput').value;
+    const gfg = document.getElementById('gfgInput').value;
+    const hackerRank = document.getElementById('hackerRankInput').value;
+    const codechef = document.getElementById('codechefInput').value;
+    const projectsInput = document.getElementById('projectsInput').value;
+
+    if (!person || !phone || !email || !achievements || !leetcode || !gfg || !hackerRank || !codechef || !projectsInput) {
+      alert('Please fill all fields!');
+      return;
+    }
+
+    const newEntry = {
+      person,
+      phone,
+      email,
+      achievements,
+      rankings: { leetcode, gfg, hackerRank, codechef },
+      projects: projectsInput.split(',').map(p => p.trim())
+    };
+
+    if (!streamData[selectedStream]) {
+      streamData[selectedStream] = [];
+    }
+    streamData[selectedStream].push(newEntry);
+
+    clearForm();
+    showAllDetails();
+  }
+
+  function showAllDetails() {
+    const allDetailsDiv = document.getElementById('allDetails');
+    allDetailsDiv.innerHTML = '';
+
+    if (streamData[selectedStream]) {
+      streamData[selectedStream].forEach((entry, index) => {
+        const entryDiv = document.createElement('div');
+        entryDiv.style.marginBottom = "20px";
+        entryDiv.innerHTML = `
+          <h3>Entry ${index + 1}</h3>
+          <p><strong>Name:</strong> ${entry.person}</p>
+          <p><strong>Phone:</strong> ${entry.phone}</p>
+          <p><strong>Email:</strong> ${entry.email}</p>
+          <p><strong>Achievements:</strong> ${entry.achievements}</p>
+          <p><strong>Rankings:</strong></p>
+          <ul>
+            <li>LeetCode: ${entry.rankings.leetcode}</li>
+            <li>GeeksforGeeks: ${entry.rankings.gfg}</li>
+            <li>HackerRank: ${entry.rankings.hackerRank}</li>
+            <li>CodeChef: ${entry.rankings.codechef}</li>
+          </ul>
+          <p><strong>Projects:</strong></p>
+          <ul class="projects">
+            ${entry.projects.map(project => `<li>${project}</li>`).join('')}
+          </ul>
+          <button class="delete-btn" onclick="deleteEntry(${index})">Delete</button>
+          <hr>
+        `;
+        allDetailsDiv.appendChild(entryDiv);
+      });
+    }
+  }
+
+  function deleteEntry(index) {
+    if (confirm("Are you sure you want to delete this entry?")) {
+      streamData[selectedStream].splice(index, 1);
+      showAllDetails();
+    }
+  }
+
+  function clearForm() {
+    document.getElementById('personInput').value = '';
+    document.getElementById('phoneInput').value = '';
+    document.getElementById('emailInput').value = '';
+    document.getElementById('achievementsInput').value = '';
+    document.getElementById('leetcodeInput').value = '';
+    document.getElementById('gfgInput').value = '';
+    document.getElementById('hackerRankInput').value = '';
+    document.getElementById('codechefInput').value = '';
+    document.getElementById('projectsInput').value = '';
+  }
+
+  displayStreams();
+</script>
+
+</body>
+</html>
