@@ -149,7 +149,8 @@
     "Backend Development"
   ];
 
-  const streamData = {};
+  // Load stream data from localStorage or initialize an empty object
+  const streamData = JSON.parse(localStorage.getItem('streamData')) || {};
   let selectedStream = '';
 
   function displayStreams() {
@@ -206,6 +207,9 @@
     }
     streamData[selectedStream].push(newEntry);
 
+    // Save updated data to localStorage
+    localStorage.setItem('streamData', JSON.stringify(streamData));
+
     clearForm();
     showAllDetails();
   }
@@ -246,6 +250,8 @@
   function deleteEntry(index) {
     if (confirm("Are you sure you want to delete this entry?")) {
       streamData[selectedStream].splice(index, 1);
+      // Save updated data to localStorage
+      localStorage.setItem('streamData', JSON.stringify(streamData));
       showAllDetails();
     }
   }
